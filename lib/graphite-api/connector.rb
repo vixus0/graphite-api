@@ -30,7 +30,7 @@ module GraphiteAPI
     def puts message
       begin
         Logger.debug [:connector,:puts,[@host, @port].join(":"),message]
-        socket.puts message + "\n"
+        socket.send message + "\n", 0
       rescue Errno::EPIPE, Errno::EINVAL
         @socket = nil
       retry
@@ -46,7 +46,9 @@ module GraphiteAPI
     def socket
       if @socket.nil? || @socket.closed?
         Logger.debug [:connector,[@host,@port]]
-        @socket = ::TCPSocket.new @host, @port
+        # @socket = ::TCPSocket.new @host, @port
+        @socket = ::UDPSocket.new 
+        @socket.connect @host, @port
       end
       @socket
     end
